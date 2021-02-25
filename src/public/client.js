@@ -3,7 +3,21 @@ let store = {
     apod: '',
     rovers: ['Curiosity', 'Opportunity', 'Spirit'],
 };
+/* immutable state
+let store = Immutable.Map({
+    user: Immutable.Map({
+        name: 'Student: Eric Zhao',
+    }),
+    apod: '',
+    rovers: Immutable.List(['Curiosity', 'Opportunity', 'Spirit']),
+    selectedRover: 'Curiosity',
+    photo: '',
+});
 
+const updateState = function (state, newState) {
+    (store = state.merge(newState)), render(root, store);
+};
+*/
 // add our markup to the page
 const root = document.getElementById('root');
 
