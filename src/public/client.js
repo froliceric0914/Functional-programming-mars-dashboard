@@ -1,10 +1,12 @@
 // const { update } = require('immutable');
+const { set } = require('immutable');
 
 let store = {
     user: { name: 'Student' },
     apod: '',
     roverName: ['Curiosity', 'Opportunity', 'Spirit'],
     rovers: {},
+    photos: {},
 };
 /* immutable state
 let store = Immutable.Map({
@@ -55,7 +57,7 @@ const render = async (root, state) => {
 
 /* main part to be updated*/
 const App = (state) => {
-    let { rovers, apod } = state;
+    let { rovers, photos, apod } = state;
 
     return `
         <header></header>
@@ -73,11 +75,13 @@ const App = (state) => {
                     but generally help with discoverability of relevant imagery.
                 </p>
                 ${ImageOfTheDay(apod)}
-                <div>${LatestRoverPhotos(rovers, photos)}</div>
+                ${RoverData(rovers, photos)}
             </section>
         </main>
         <footer></footer>
     `;
+
+    /* <div>${LatestRoverPhotos(rovers, photos)}</div> */
 };
 
 // listening for load event because page should load before any JS is called
@@ -128,6 +132,23 @@ const ImageOfTheDay = (apod) => {
     }
 };
 
+//could add selectRover into the params
+//get he launch date, landing date, name and status along with any other information about the rover.
+//call the photo API
+const RoverData = (rovers, photos) => {
+    const rover = Object.keys(rovers).find((rover) => rover === 'curiosity');
+
+    console.log('rover', rover);
+    if (!rover) {
+        getRoverData('curiosity');
+    }
+    return `<section>
+        <p>
+            Lanch data: ${rover.lauch_data}
+        </p>
+    </section>`;
+};
+
 // ------------------------------------------------------  API CALLS
 
 // Example API call
@@ -142,24 +163,32 @@ const getImageOfTheDay = (state) => {
     return data;
 };
 
-//add rover photo render method
+//add rover photo API call method
 /*
 1. get rover data
 2. get latest rover photo
+...
+could be removed into helper function
+need to be put on the 
 */
 
-// const getRoverData = (rover_name) => {
-//     //axios?
-//     //could add dev/prod env to decide on the fetch ip
-//     fetch(`http://localhost:3000/rovers/${rover_name}`)
-//         .then((res) => res.json())
-//         .then((data) => {
-//             console.log('rover data', data);
-//             updateStore(store, {
-//                 ...,
-//             })
-//         });
-// };
+const getRoverData = (rover_name) => {
+    //axios?
+    //could add dev/prod env to decide on the fetch ip
+    fetch(`http://localhost:3000/rovers/${rover_name}`)
+        .then((res) => res.json())
+        .then((data) => {
+            console.log('rover data', data);
+            //now everything are stored in store.rovers, but the values could be store in store[keys]
+            updateStore(store, {
+                rovers: set(store.rovers, rover_name, {
+                    ...store.rovers[rover_name],
+                    ...photo_manifest,
+                    //this is the manifest info
+                }),
+            });
+        });
+};
 
 const getLatestRoverPhotos = async (rover_name) => {
     try {
