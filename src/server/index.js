@@ -15,12 +15,25 @@ app.use('/', express.static(path.join(__dirname, '../public')));
 // your API calls
 app.get('/rovers/:rover_name', async (req, res) => {
     try {
-        const earth_date = req.query.max_date;
-        console.log('date: ', earth_date);
+        // const earth_date = req.query.max_date;
+
         let rovers_img = await fetch(
-            `https://api.nasa.gov/mars-photos/api/v1/rovers/${req.params.rover_name}/photos?earth_date=${earth_date}&api_key=${process.env.API_KEY}`
+            `https://api.nasa.gov/mars-photos/api/v1/rovers/${req.params.rover_name}/photos?earth_date=2015-6-3&api_key=${process.env.API_KEY}`
         ).then((res) => res.json());
         console.log('hello world');
+        res.send(rovers_img);
+    } catch (err) {
+        console.log('error: ', err);
+    }
+});
+app.get('/rover_photo/:rover_name', async (req, res) => {
+    try {
+        // const earth_date = req.query.max_date;
+
+        let rovers_img = await fetch(
+            `https://api.nasa.gov/mars-photos/api/v1/rovers/${req.params.rover_name}/latest_photos?api_key=${process.env.API_KEY}`
+        ).then((res) => res.json());
+        console.log('hello world', res);
         res.send(rovers_img);
     } catch (err) {
         console.log('error: ', err);

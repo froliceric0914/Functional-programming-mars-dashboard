@@ -1,7 +1,10 @@
+// const { update } = require('immutable');
+
 let store = {
     user: { name: 'Student' },
     apod: '',
-    rovers: ['Curiosity', 'Opportunity', 'Spirit'],
+    roverName: ['Curiosity', 'Opportunity', 'Spirit'],
+    rovers: {},
 };
 /* immutable state
 let store = Immutable.Map({
@@ -19,8 +22,26 @@ const updateState = function (state, newState) {
 };
 */
 // add our markup to the page
+
+const LatestRoverPhotos = (rover_name, photos) => {
+    const rover = Object.keys(photos).find((photo) => photo === rover_name);
+    if (!rover) {
+        getLatestRoverPhotos(rover_name);
+    }
+
+    const roverPhotos = store.photos[rover_name];
+    return `<section>
+        <div class="photos">
+            ${roverPhotos.map(
+                (photo) => `<img class="rover-img" src=${photo.img_src}>`
+            )}
+        </div>
+    </section>`;
+};
+
 const root = document.getElementById('root');
 
+//could be updated to immutable way
 const updateStore = (store, newState) => {
     store = Object.assign(store, newState);
     render(root, store);
@@ -31,6 +52,8 @@ const render = async (root, state) => {
 };
 
 // create content
+
+/* main part to be updated*/
 const App = (state) => {
     let { rovers, apod } = state;
 
@@ -50,6 +73,7 @@ const App = (state) => {
                     but generally help with discoverability of relevant imagery.
                 </p>
                 ${ImageOfTheDay(apod)}
+                <div>${LatestRoverPhotos(rovers, photos)}</div>
             </section>
         </main>
         <footer></footer>
@@ -116,4 +140,41 @@ const getImageOfTheDay = (state) => {
         .then((apod) => updateStore(store, { apod }));
 
     return data;
+};
+
+//add rover photo render method
+/*
+1. get rover data
+2. get latest rover photo
+*/
+
+// const getRoverData = (rover_name) => {
+//     //axios?
+//     //could add dev/prod env to decide on the fetch ip
+//     fetch(`http://localhost:3000/rovers/${rover_name}`)
+//         .then((res) => res.json())
+//         .then((data) => {
+//             console.log('rover data', data);
+//             updateStore(store, {
+//                 ...,
+//             })
+//         });
+// };
+
+const getLatestRoverPhotos = async (rover_name) => {
+    try {
+        fetch(`http://localhost:3000/rover_photos/${rover_name}`)
+            .then((res) => res.json())
+            .then(({ latest_photo, ...props }) => {
+                console.log('hello res.props', props);
+                updateStore(store, {
+                    photos: {
+                        ...store.photos,
+                        [rover_name]: [...latest_photos],
+                    },
+                });
+            });
+    } catch (errr) {
+        console.log('get latest rover photos error', err);
+    }
 };
