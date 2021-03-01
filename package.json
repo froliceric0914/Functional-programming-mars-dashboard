@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/server/index.js localhost 3000"
+    "start": "npm run build && nodemon src/server/index.js localhost 3000",
+    "watch": "watchify src/public/client.js -o src/public/bundle.js -v",
+    "build": "browserify src/public/client.js -o src/public/bundle.js "
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +19,8 @@
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.7"
+    "browserify": "^17.0.0",
+    "nodemon": "^2.0.7",
+    "watchify": "^4.0.0"
   }
 }

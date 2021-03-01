@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 const path = require('path');
+// const browserify = require('browserify');
 
 const app = express();
 const port = 3000;
@@ -11,6 +12,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use('/', express.static(path.join(__dirname, '../public')));
+
+// app.get('/app.js', browserify('../public/bundle.js'));
 
 // your API calls
 // app.get('/rovers/:rover_name', async (req, res) => {

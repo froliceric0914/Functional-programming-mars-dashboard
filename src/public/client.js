@@ -57,6 +57,8 @@ const render = async (root, state) => {
 
 /* main part to be updated*/
 const App = (state) => {
+    console.log('state', state);
+
     let { rovers, photos, apod } = state;
 
     return `
@@ -74,12 +76,12 @@ const App = (state) => {
                     explanation are returned. These keywords could be used as auto-generated hashtags for twitter or instagram feeds;
                     but generally help with discoverability of relevant imagery.
                 </p>
-                ${ImageOfTheDay(apod)}
                 ${RoverData(rovers, photos)}
-            </section>
-        </main>
-        <footer></footer>
-    `;
+                </section>
+                </main>
+                <footer></footer>
+                `;
+    // ${ImageOfTheDay(apod)}
 
     /* <div>${LatestRoverPhotos(rovers, photos)}</div> */
 };
@@ -106,7 +108,6 @@ const Greeting = (name) => {
 
 // Example of a pure function that renders infomation requested from the backend
 const ImageOfTheDay = (apod) => {
-    console.log('apod', apod);
     // If image does not already exist, or it is not from today -- request it again
     const today = new Date();
     const photodate = new Date(apod.date);
@@ -126,7 +127,7 @@ const ImageOfTheDay = (apod) => {
         `;
     } else {
         return `
-            <img src="${apod.image.url}" height="350px" width="100%" />
+            // <img src="${apod.image.url}" height="350px" width="100%" />
             <p>${apod.image.explanation}</p>
         `;
     }
@@ -138,14 +139,17 @@ const ImageOfTheDay = (apod) => {
 const RoverData = (rovers, photos) => {
     const rover = Object.keys(rovers).find((rover) => rover === 'curiosity');
 
-    console.log('rover', rover);
+    let selectedRover = store.rovers[rover];
+    console.log('find selectedRover data:', selectedRover);
     if (!rover) {
         getRoverData('curiosity');
     }
     return `<section>
-        <p>
-            Lanch data: ${rover.lauch_data}
-        </p>
+        <div>      
+        <p>Rover Name: ${rover}</p>
+        <p>Launch date: ${selectedRover.launch_date}</p>
+        <p></p>Landing date: ${selectedRover.landing_date}</p>
+        </div>
     </section>`;
 };
 
@@ -154,7 +158,6 @@ const RoverData = (rovers, photos) => {
 // Example API call
 const getImageOfTheDay = (state) => {
     let { apod } = state;
-    console.log('state', state);
 
     fetch(`http://localhost:3000/apod`)
         .then((res) => res.json())
@@ -178,15 +181,15 @@ const getRoverData = (rover_name) => {
     fetch(`http://localhost:3000/rovers/${rover_name}`)
         .then((res) => res.json())
         .then((data) => {
-            console.log('rover data', data);
             //now everything are stored in store.rovers, but the values could be store in store[keys]
             updateStore(store, {
                 rovers: set(store.rovers, rover_name, {
                     ...store.rovers[rover_name],
-                    ...photo_manifest,
+                    ...data.photo_manifest,
                     //this is the manifest info
                 }),
             });
+            console.log('getRoverData store.rovers', store.rovers);
         });
 };
 
@@ -195,13 +198,13 @@ const getLatestRoverPhotos = async (rover_name) => {
         fetch(`http://localhost:3000/rover_photos/${rover_name}`)
             .then((res) => res.json())
             .then(({ latest_photo, ...props }) => {
-                console.log('hello res.props', props);
                 updateStore(store, {
                     photos: {
                         ...store.photos,
                         [rover_name]: [...latest_photos],
                     },
                 });
+                console.log('store', store);
             });
     } catch (errr) {
         console.log('get latest rover photos error', err);
