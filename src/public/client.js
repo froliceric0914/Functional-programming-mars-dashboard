@@ -41,6 +41,8 @@ const render = async (root, state) => {
 // create content
 
 function onSelectNav(selectedTab) {
+    console.log(('update store by onSelectedNae', store));
+    console.log('selectedTab', selectedTab);
     updateStore(store, { selectedRover: selectedTab });
 }
 window.onSelectNav = onSelectNav;
@@ -54,7 +56,7 @@ const NavBar = () => {
     ${roverName
         .map((rover) => {
             console.log('nav rover', rover);
-            return `<a id=${rover} onclick="onSelectNav(rover)">${rover}</a>`;
+            return `<a style="margin:10px" id=${rover} onclick="onSelectNav(id)">${rover}</a>`;
         })
         .join('')}
     </nav>
@@ -117,9 +119,8 @@ const Greeting = (name) => {
 //call the photo API
 const RoverData = (rovers, selectedRover, photos) => {
     const rover = Object.keys(rovers).find((rover) => rover === selectedRover);
-
+    //why need photos here? cuz the latest photo function will update the photo
     let roverToRender = store.rovers[rover];
-    console.log('find roverToRender data:', roverToRender);
     if (!rover) {
         getRoverData(selectedRover);
     }
@@ -129,23 +130,24 @@ const RoverData = (rovers, selectedRover, photos) => {
         <p>Launch date: ${roverToRender.launch_date}</p>
         <p></p>Landing date: ${roverToRender.landing_date}</p>
         </div>
-        <div>${LatestRoverPhoto(roverToRender, photos)}</div>
+        <div>${LatestRoverPhoto(roverToRender.name, photos)}</div>
     </section>`;
 };
 
-const LatestRoverPhoto = (roverToRender, photos) => {
-    const roverPhoto = Object.keys(photos).find((key) => key === roverToRender);
-    console.log('roverPhoto', roverPhoto);
+const LatestRoverPhoto = (rover_name, photos) => {
+    const roverPhoto = Object.keys(photos).find((key) => key === rover_name);
+    console.log('rover Photo', roverPhoto);
+    console.log('rover_name', rover_name);
     if (!roverPhoto) {
-        getLatestRoverPhotos(roverToRender);
+        getLatestRoverPhotos(rover_name);
     }
 
-    const selectedRoverPhotos = store.photos[roverToRender];
+    const selectedRoverPhotos = store.photos[rover_name];
 
     if (selectedRoverPhotos) {
         return `
             <section>
-                <p>Check out some of ${roverToRender}'s most recent photos. The following photos were taken:</p>
+                <p>Check out some of ${rover_name}'s most recent photos. The following photos were taken:</p>
                 <div class="photos">
                     ${selectedRoverPhotos
                         .map(
@@ -187,7 +189,6 @@ const getRoverData = (rover_name) => {
                     [rover_name]: data.photo_manifest,
                 },
             });
-            console.log('getRoverData store.rovers', store.rovers);
         });
 };
 
