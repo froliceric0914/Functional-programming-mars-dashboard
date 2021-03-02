@@ -5906,6 +5906,24 @@ const render = async (root, state) => {
 
 // create content
 
+function onSelectNav(selectedTab) {
+    updateStore(store, { selectedRover: selectedTab });
+}
+window.onSelectNav = onSelectNav;
+
+const NavBar = (selectedRover) => {
+    const roverName = ['Curiosity', 'Opportunity', 'Spirit'];
+    //update the roveName by clicking
+
+    return `
+    <nav>
+    ${roverName.map(
+        (rover) => `<a id=${rover} onclick="onSelectNav(id)">${rover}</a>`
+    )}
+    </nav>
+    `;
+};
+
 /* main part to be updated*/
 const App = (state) => {
     console.log('state', state);
@@ -5913,7 +5931,7 @@ const App = (state) => {
     let { rovers, photos } = state;
 
     return `
-        <header></header>
+        <header>${NavBar()}</header>
         <main>
             ${Greeting(store.user.name)}
             <section>
@@ -5990,8 +6008,7 @@ const LatestRoverPhoto = (rover_name, photos) => {
     if (selectedRoverPhotos) {
         return `
             <section>
-                <p>Check out some of ${rover_name}'s most recent photos. The following photos were taken
-        )}.</p>
+                <p>Check out some of ${rover_name}'s most recent photos. The following photos were taken:</p>
                 <div class="photos">
                     ${selectedRoverPhotos
                         .map(
