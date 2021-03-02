@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && nodemon src/server/index.js localhost 3000",
-    "watch": "watchify src/public/client.js -o src/public/bundle.js -v",
+    "watch": "watchify src/public/client.js -o src/public/bundle.js",
     "build": "browserify src/public/client.js -o src/public/bundle.js "
   },
   "author": "",

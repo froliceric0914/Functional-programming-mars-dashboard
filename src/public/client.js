@@ -1,10 +1,11 @@
 // const { update } = require('immutable');
-const { set } = require('immutable');
+// const { set } = require('immutable');
 
 let store = {
     user: { name: 'Student' },
     apod: '',
     roverName: ['Curiosity', 'Opportunity', 'Spirit'],
+    selectedRover: 'Curiosity',
     rovers: {},
     photos: {},
 };
@@ -44,15 +45,18 @@ function onSelectNav(selectedTab) {
 }
 window.onSelectNav = onSelectNav;
 
-const NavBar = (selectedRover) => {
+const NavBar = () => {
     const roverName = ['Curiosity', 'Opportunity', 'Spirit'];
     //update the roveName by clicking
 
     return `
     <nav>
-    ${roverName.map(
-        (rover) => `<a id=${rover} onclick="onSelectNav(id)">${rover}</a>`
-    )}
+    ${roverName
+        .map((rover) => {
+            console.log('nav rover', rover);
+            return `<a id=${rover} onclick="onSelectNav(rover)">${rover}</a>`;
+        })
+        .join('')}
     </nav>
     `;
 };
@@ -61,7 +65,7 @@ const NavBar = (selectedRover) => {
 const App = (state) => {
     console.log('state', state);
 
-    let { rovers, photos } = state;
+    let { rovers, selectedRover, photos } = state;
 
     return `
         <header>${NavBar()}</header>
@@ -78,7 +82,7 @@ const App = (state) => {
                     explanation are returned. These keywords could be used as auto-generated hashtags for twitter or instagram feeds;
                     but generally help with discoverability of relevant imagery.
                 </p>
-                ${RoverData(rovers, photos)}
+                ${RoverData(rovers, selectedRover, photos)}
                 </section>
                 </main>
                 <footer></footer>
@@ -111,37 +115,37 @@ const Greeting = (name) => {
 //could add selectRover into the params
 //get he launch date, landing date, name and status along with any other information about the rover.
 //call the photo API
-const RoverData = (rovers, photos) => {
-    const rover = Object.keys(rovers).find((rover) => rover === 'curiosity');
+const RoverData = (rovers, selectedRover, photos) => {
+    const rover = Object.keys(rovers).find((rover) => rover === selectedRover);
 
-    let selectedRover = store.rovers[rover];
-    console.log('find selectedRover data:', selectedRover);
+    let roverToRender = store.rovers[rover];
+    console.log('find roverToRender data:', roverToRender);
     if (!rover) {
-        getRoverData('curiosity');
+        getRoverData(selectedRover);
     }
     return `<section>
         <div>      
         <p>Rover Name: ${rover}</p>
-        <p>Launch date: ${selectedRover.launch_date}</p>
-        <p></p>Landing date: ${selectedRover.landing_date}</p>
+        <p>Launch date: ${roverToRender.launch_date}</p>
+        <p></p>Landing date: ${roverToRender.landing_date}</p>
         </div>
-        <div>${LatestRoverPhoto('curiosity', photos)}</div>
+        <div>${LatestRoverPhoto(roverToRender, photos)}</div>
     </section>`;
 };
 
-const LatestRoverPhoto = (rover_name, photos) => {
-    const roverPhoto = Object.keys(photos).find((key) => key === rover_name);
-
+const LatestRoverPhoto = (roverToRender, photos) => {
+    const roverPhoto = Object.keys(photos).find((key) => key === roverToRender);
+    console.log('roverPhoto', roverPhoto);
     if (!roverPhoto) {
-        getLatestRoverPhotos(rover_name);
+        getLatestRoverPhotos(roverToRender);
     }
 
-    const selectedRoverPhotos = store.photos[rover_name];
+    const selectedRoverPhotos = store.photos[roverToRender];
 
     if (selectedRoverPhotos) {
         return `
             <section>
-                <p>Check out some of ${rover_name}'s most recent photos. The following photos were taken:</p>
+                <p>Check out some of ${roverToRender}'s most recent photos. The following photos were taken:</p>
                 <div class="photos">
                     ${selectedRoverPhotos
                         .map(
@@ -178,11 +182,10 @@ const getRoverData = (rover_name) => {
         .then((data) => {
             //now everything are stored in store.rovers, but the values could be store in store[keys]
             updateStore(store, {
-                rovers: set(store.rovers, rover_name, {
-                    ...store.rovers[rover_name],
-                    ...data.photo_manifest,
-                    //this is the manifest info
-                }),
+                rovers: {
+                    ...store.rovers,
+                    [rover_name]: data.photo_manifest,
+                },
             });
             console.log('getRoverData store.rovers', store.rovers);
         });
