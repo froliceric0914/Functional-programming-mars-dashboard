@@ -1,10 +1,13 @@
 // const { update } = require('immutable');
 // const { set } = require('immutable');
+// import './assets/stylesheets/resets.css';
+// import './assets/stylesheets/index.css';
+// import img from './assets/images/milky-way.jpeg';
 
 let store = {
     user: { name: 'Student' },
     apod: '',
-    roverName: ['Curiosity', 'Opportunity', 'Spirit'],
+    roverNames: ['Curiosity', 'Opportunity', 'Spirit'],
     selectedRover: 'Curiosity',
     rovers: {},
     photos: {},
@@ -40,21 +43,22 @@ const render = async (root, state) => {
 
 // create content
 
-function onSelectNav(selectedTab) {
-    console.log('selectedTab', selectedTab);
-    updateStore(store, { selectedRover: selectedTab });
+function onSelectNav(rover) {
+    updateStore(store, { selectedRover: rover });
 }
 window.onSelectNav = onSelectNav;
 
-const NavBar = (roverName) => {
+const NavBar = (roverNames, selectedRover) => {
     //update the roveName by clicking
 
     return `
-    <nav>
-    ${roverName
+    <nav id="navbar">
+    ${roverNames
         .map(
             (rover) =>
-                `<a style="margin:10px" id=${rover} onclick="onSelectNav(id)">${rover}</a>`
+                `<a class="navbar-item ${
+                    rover === selectedRover ? 'active' : ''
+                }" id=${rover} onclick="onSelectNav(id)">${rover}</a>`
         )
         .join('')}
     </nav>
@@ -63,12 +67,12 @@ const NavBar = (roverName) => {
 
 /* main part to be updated*/
 const App = (state) => {
-    console.log('app state', state);
+    // console.log('app state', state);
 
-    let { roverName, rovers, selectedRover, photos } = state;
+    let { roverNames, rovers, selectedRover, photos } = state;
 
     return `
-        <header>${NavBar(roverName)}</header>
+        <header>${NavBar(roverNames, selectedRover)}</header>
         <main>
             ${Greeting(store.user.name)}
             <section>

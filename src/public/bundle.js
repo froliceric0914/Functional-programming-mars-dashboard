@@ -1,11 +1,14 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 // const { update } = require('immutable');
 // const { set } = require('immutable');
+// import './assets/stylesheets/resets.css';
+// import './assets/stylesheets/index.css';
+// import img from './assets/images/milky-way.jpeg';
 
 let store = {
     user: { name: 'Student' },
     apod: '',
-    roverName: ['Curiosity', 'Opportunity', 'Spirit'],
+    roverNames: ['Curiosity', 'Opportunity', 'Spirit'],
     selectedRover: 'Curiosity',
     rovers: {},
     photos: {},
@@ -41,33 +44,53 @@ const render = async (root, state) => {
 
 // create content
 
-function onSelectNav(selectedTab) {
-    updateStore(store, { selectedRover: selectedTab });
+function onSelectNav(rover) {
+    // const navbarDiv = document.getElementById('navbar');
+
+    // const tabs = navbarDiv.getElementsByClassName('navbar-item');
+
+    // console.log('selectedTab', selectedTab);
+    // console.log('tabs', tabs);
+
+    // for (let i = 0; i < tabs.length; i++) {
+    //     tabs[i].addEventListener('click', function () {
+    //         var current = document.getElementsById('active');
+    //         console.log('current', current);
+    //         current[0].className = current[0].className.replace(' active', '');
+    //         this.className += ' active';
+    //         console.log('this.className', this.className);
+    //     });
+    // }
+
+    updateStore(store, { selectedRover: rover });
 }
 window.onSelectNav = onSelectNav;
 
-const NavBar = () => {
-    const roverName = ['Curiosity', 'Opportunity', 'Spirit', 'hello'];
+const NavBar = (roverNames, selectedRover) => {
     //update the roveName by clicking
 
     return `
-    <nav>
-    ${roverName.map((rover) => {
-        console.log('nav rover', rover);
-        return `<a id=${rover} onclick="onSelectNav(rover)">${rover}</a>`;
-    })}
+    <nav id="navbar">
+    ${roverNames
+        .map(
+            (rover) =>
+                `<a class="navbar-item ${
+                    rover === selectedRover ? 'active' : ''
+                }" id=${rover} onclick="onSelectNav(id)">${rover}</a>`
+        )
+        .join('')}
     </nav>
     `;
 };
 
 /* main part to be updated*/
 const App = (state) => {
-    console.log('state', state);
+    // console.log('app state', state);
 
-    let { rovers, selectedRover, photos } = state;
+    let { roverNames, rovers, selectedRover, photos } = state;
 
     return `
-        <header>${NavBar()}</header>
+        <header>${NavBar(roverNames, selectedRover)}</header>
         <main>
             ${Greeting(store.user.name)}
             <section>
@@ -116,46 +139,56 @@ const Greeting = (name) => {
 //call the photo API
 const RoverData = (rovers, selectedRover, photos) => {
     const rover = Object.keys(rovers).find((rover) => rover === selectedRover);
-
+    //why need photos here? cuz the latest photo function will update the photo
     let roverToRender = store.rovers[rover];
-    console.log('find roverToRender data:', roverToRender);
     if (!rover) {
         getRoverData(selectedRover);
     }
-    return `<section>
+    if (roverToRender) {
+        return `<section>
         <div>      
         <p>Rover Name: ${rover}</p>
         <p>Launch date: ${roverToRender.launch_date}</p>
         <p></p>Landing date: ${roverToRender.landing_date}</p>
         </div>
-        <div>${LatestRoverPhoto(roverToRender, photos)}</div>
+        <div>${LatestRoverPhoto(roverToRender.name, photos)}</div>
     </section>`;
+    }
+    return `
+        <section>
+            <div> Loading infomation of rover ${selectedRover}... </div>
+        </section>`;
 };
 
-const LatestRoverPhoto = (roverToRender, photos) => {
-    const roverPhoto = Object.keys(photos).find((key) => key === roverToRender);
-    console.log('roverPhoto', roverPhoto);
+const LatestRoverPhoto = (rover_name, photos) => {
+    const roverPhoto = Object.keys(photos).find((key) => key === rover_name);
+
     if (!roverPhoto) {
-        getLatestRoverPhotos(roverToRender);
+        getLatestRoverPhotos(rover_name);
     }
 
-    const selectedRoverPhotos = store.photos[roverToRender];
+    const selectedRoverPhotos = store.photos[rover_name];
 
     if (selectedRoverPhotos) {
         return `
             <section>
-                <p>Check out some of ${roverToRender}'s most recent photos. The following photos were taken:</p>
+                <p>Check out some of ${rover_name}'s most recent photo:</p>
                 <div class="photos">
                     ${selectedRoverPhotos
                         .map(
                             (photo) =>
-                                `<img class="rover-img" src=${photo.img_src} width=300px/>`
+                                `
+                                <div>
+                                    <img class="rover-img" src=${photo.img_src} width="300px" />
+                                    <div>This photo was taken on earth day of ${photo.earth_date}</div>
+                                </div>`
                         )
                         .join('')}
                 </div>
             </section>
         `;
     }
+
     return `
         <section>
             <div> Loading Photos... </div>
@@ -178,33 +211,33 @@ const getRoverData = (rover_name) => {
     //could add dev/prod env to decide on the fetch ip
     fetch(`http://localhost:3000/rovers/${rover_name}`)
         .then((res) => res.json())
-        .then((data) => {
+        .then(({ photo_manifest }) => {
             //now everything are stored in store.rovers, but the values could be store in store[keys]
             updateStore(store, {
                 rovers: {
                     ...store.rovers,
-                    [rover_name]: data.photo_manifest,
+                    [rover_name]: {
+                        launch_date: photo_manifest.launch_date,
+                        landing_date: photo_manifest.landing_date,
+                        name: photo_manifest.name,
+                    },
                 },
             });
-            console.log('getRoverData store.rovers', store.rovers);
         });
 };
 
 const getLatestRoverPhotos = async (rover_name) => {
-    console.log('rover_name: ', rover_name);
     try {
         fetch(`http://localhost:3000/rover_photo/${rover_name}`)
             .then((res) => res.json())
             .then((data) => {
-                console.log('get latest rover photos Data: ', data);
-                const trimPhoto = data.latest_photos.slice(0, 4);
+                const trimPhoto = data.latest_photos.slice(0, 1);
                 updateStore(store, {
                     photos: {
                         ...store.photos,
                         [rover_name]: trimPhoto,
                     },
                 });
-                console.log('store', store);
             });
     } catch (errr) {
         console.log('get latest rover photos error', err);
