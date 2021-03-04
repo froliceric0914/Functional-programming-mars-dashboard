@@ -1,8 +1,12 @@
 // const { update } = require('immutable');
 // const { set } = require('immutable');
-// import './assets/stylesheets/resets.css';
-// import './assets/stylesheets/index.css';
-// import img from './assets/images/milky-way.jpeg';
+
+/*
+todo:
+1. display 3 photo for each rover;
+2. add content to the bodt;
+3. update the store to immutabl way
+*/
 
 let store = {
     user: { name: 'Student' },
@@ -41,16 +45,13 @@ const render = async (root, state) => {
     root.innerHTML = App(state);
 };
 
-// create content
-
+// update the current rover by selecting on Navbar item
 function onSelectNav(rover) {
     updateStore(store, { selectedRover: rover });
 }
 window.onSelectNav = onSelectNav;
 
 const NavBar = (roverNames, selectedRover) => {
-    //update the roveName by clicking
-
     return `
     <nav id="navbar">
     ${roverNames
@@ -67,8 +68,6 @@ const NavBar = (roverNames, selectedRover) => {
 
 /* main part to be updated*/
 const App = (state) => {
-    // console.log('app state', state);
-
     let { roverNames, rovers, selectedRover, photos } = state;
 
     return `
@@ -76,16 +75,6 @@ const App = (state) => {
         <main>
             ${Greeting(store.user.name)}
             <section>
-                <h3>Put things on the page!</h3>
-                <p>Here is an example section.</p>
-                <p>
-                    One of the most popular websites at NASA is the Astronomy Picture of the Day. In fact, this website is one of
-                    the most popular websites across all federal agencies. It has the popular appeal of a Justin Bieber video.
-                    This endpoint structures the APOD imagery and associated metadata so that it can be repurposed for other
-                    applications. In addition, if the concept_tags parameter is set to True, then keywords derived from the image
-                    explanation are returned. These keywords could be used as auto-generated hashtags for twitter or instagram feeds;
-                    but generally help with discoverability of relevant imagery.
-                </p>
                 ${RoverData(rovers, selectedRover, photos)}
                 </section>
                 </main>
@@ -107,7 +96,7 @@ window.addEventListener('load', () => {
 const Greeting = (name) => {
     if (name) {
         return `
-            <h1>Welcome, ${name}!</h1>
+            <h1>Welcome!</h1>
         `;
     }
 
@@ -128,12 +117,13 @@ const RoverData = (rovers, selectedRover, photos) => {
     }
     if (roverToRender) {
         return `<section>
-        <div>      
-        <p>Rover Name: ${rover}</p>
-        <p>Launch date: ${roverToRender.launch_date}</p>
-        <p></p>Landing date: ${roverToRender.landing_date}</p>
+        <div class="dashboard"> 
+            <div>${LatestRoverPhoto(roverToRender.name, photos)}</div>
+        
+            <p>Rover Name: ${rover}</p>
+            <p>Launch date: ${roverToRender.launch_date}</p>
+            <p>Landing date: ${roverToRender.landing_date}</p>
         </div>
-        <div>${LatestRoverPhoto(roverToRender.name, photos)}</div>
     </section>`;
     }
     return `
