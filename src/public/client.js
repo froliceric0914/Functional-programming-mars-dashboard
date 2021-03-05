@@ -1,5 +1,5 @@
 // const { update } = require('immutable');
-// const { set } = require('immutable');
+const { Map, List, set } = require('immutable');
 
 /*
 todo:
@@ -8,36 +8,34 @@ todo:
 3. update the store to immutabl way
 */
 
-let store = {
-    roverNames: ['Curiosity', 'Opportunity', 'Spirit'],
+// let store = {
+//     roverNames: ['Curiosity', 'Opportunity', 'Spirit'],
+//     selectedRover: 'Curiosity',
+//     rovers: {},
+//     photos: {},
+// };
+
+let store = Map({
+    roverNames: List(['Curiosity', 'Opportunity', 'Spirit']),
     selectedRover: 'Curiosity',
-    rovers: {},
-    photos: {},
-};
-/* immutable state
-let store = Immutable.Map({
-    user: Immutable.Map({
-        name: 'Student: Eric Zhao',
-    }),
-    apod: '',
-    rovers: Immutable.List(['Curiosity', 'Opportunity', 'Spirit']),
-    selectedRover: 'Curiosity',
-    photo: '',
+    rovers: Map({}),
+    photos: Map({}),
 });
 
-const updateState = function (state, newState) {
-    (store = state.merge(newState)), render(root, store);
+const updateStore = function (state, newState) {
+    store = state.merge(newState);
+    render(root, store);
 };
-*/
+
 // add our markup to the page
 
 const root = document.getElementById('root');
 
 //could be updated to immutable way
-const updateStore = (store, newState) => {
-    store = Object.assign(store, newState);
-    render(root, store);
-};
+// const updateStore = (store, newState) => {
+//     store = Object.assign(store, newState);
+//     render(root, store);
+// };
 
 const render = async (root, state) => {
     root.innerHTML = App(state);
@@ -66,7 +64,12 @@ const NavBar = (roverNames, selectedRover) => {
 
 /* main part to be updated*/
 const App = (state) => {
-    let { roverNames, rovers, selectedRover, photos } = state;
+    let { roverNames, rovers, selectedRover, photos } = state.toJS();
+    console.log('state', state.toJS());
+    console.log('roverNames', roverNames);
+    console.log('rovers', rovers);
+    console.log('selectedRover', selectedRover);
+    console.log('photos', photos);
 
     return `
         <header>${NavBar(roverNames, selectedRover)}</header>
@@ -109,20 +112,21 @@ const Greeting = (name) => {
 //get he launch date, landing date, name and status along with any other information about the rover.
 //call the photo API
 const RoverData = (rovers, selectedRover, photos) => {
+    //need a proper way to seach through immutable data
+    console.log('rovers 116:', rovers);
+    console.log('selectedRover 117:', selectedRover);
     const rover = Object.keys(rovers).find((rover) => rover === selectedRover);
-    //why need photos here? cuz the latest photo function will update the photo
-    let roverToRender = store.rovers[rover];
+    let roverToRender = store.toJS().rovers[rover];
+
     if (!rover) {
         getRoverData(selectedRover);
     }
+    console.log('roverToRender 124', roverToRender);
     if (roverToRender) {
         return `<section>
         <div class="dashboard"> 
-            <div class="rover-info">${LatestRoverPhoto(
-                roverToRender.name,
-                photos
-            )}
-        
+            <div class="rover-info">
+                ${LatestRoverPhoto(selectedRover, photos)}
                 <p>Rover Name: ${rover}</p>
                 <p>Launch date: ${roverToRender.launch_date}</p>
                 <p>Landing date: ${roverToRender.landing_date}</p>
@@ -137,13 +141,16 @@ const RoverData = (rovers, selectedRover, photos) => {
 };
 
 const LatestRoverPhoto = (rover_name, photos) => {
+    console.log('rover_name 144', rover_name);
+    console.log('photos 145', photos);
     const roverPhoto = Object.keys(photos).find((key) => key === rover_name);
 
     if (!roverPhoto) {
         getLatestRoverPhotos(rover_name);
     }
+    console.log('roverPhoto 150', roverPhoto);
 
-    const selectedRoverPhotos = store.photos[rover_name];
+    const selectedRoverPhotos = store.toJS().photos[rover_name];
 
     if (selectedRoverPhotos) {
         return `
@@ -185,21 +192,19 @@ need to be put on the
 */
 
 const getRoverData = (rover_name) => {
-    //axios?
-    //could add dev/prod env to decide on the fetch ip
     fetch(`http://localhost:3000/rovers/${rover_name}`)
         .then((res) => res.json())
         .then(({ photo_manifest }) => {
             //now everything are stored in store.rovers, but the values could be store in store[keys]
             updateStore(store, {
-                rovers: {
-                    ...store.rovers,
+                rovers: set(store.toJS().rovers, rover_name, {
+                    //need to update the structure here
                     [rover_name]: {
                         launch_date: photo_manifest.launch_date,
                         landing_date: photo_manifest.landing_date,
                         name: photo_manifest.name,
                     },
-                },
+                }),
             });
         });
 };
@@ -211,51 +216,12 @@ const getLatestRoverPhotos = async (rover_name) => {
             .then((data) => {
                 const trimPhoto = data.latest_photos.slice(0, 1);
                 updateStore(store, {
-                    photos: {
-                        ...store.photos,
+                    photos: set(store.toJS(), rover_name, {
                         [rover_name]: trimPhoto,
-                    },
+                    }),
                 });
             });
     } catch (errr) {
         console.log('get latest rover photos error', err);
-    }
-};
-
-// Example API call
-const getImageOfTheDay = (state) => {
-    let { apod } = state;
-
-    fetch(`http://localhost:3000/apod`)
-        .then((res) => res.json())
-        .then((apod) => updateStore(store, { apod }));
-
-    return data;
-};
-
-// Example of a pure function that renders infomation requested from the backend
-const ImageOfTheDay = (apod) => {
-    // If image does not already exist, or it is not from today -- request it again
-    const today = new Date();
-    const photodate = new Date(apod.date);
-    console.log(photodate.getDate(), today.getDate());
-
-    console.log(photodate.getDate() === today.getDate());
-    if (!apod || apod.date === today.getDate()) {
-        getImageOfTheDay(store);
-    }
-
-    // check if the photo of the day is actually type video!
-    if (apod.media_type === 'video') {
-        return `
-            <p>See today's featured video <a href="${apod.url}">here</a></p>
-            <p>${apod.title}</p>
-            <p>${apod.explanation}</p>
-        `;
-    } else {
-        return `
-            // <img src="${apod.image.url}" height="350px" width="100%" />
-            <p>${apod.image.explanation}</p>
-        `;
     }
 };
