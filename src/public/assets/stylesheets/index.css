@@ -44,23 +44,62 @@ main {
     padding: 20px;
 }
 
+.rover-info {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.photos {
+    width: 100%;
+}
+
+.rover-img {
+    width: 100%;
+
+    margin: 1rem auto;
+}
+
 footer {
+    color: gray;
+    font-size: 0.75rem;
     /* footer styles */
+}
+
+#heart {
+    color: red;
 }
 
 /* -------------------  TABLET  --------------------- */
 @media (min-width: 768px) {
     /* use mobile */
+    .rover-img-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 1rem auto;
+        max-width: 450px;
+    }
+
+    .rover-img {
+        width: 100%;
+        margin: 1rem auto;
+    }
 }
 
 /* -------------------  DESKTOP  -------------------- */
 
 @media (min-width: 1224px) {
-    /* use mobile */
+    .rover-img-wrapper {
+        max-width: 600px;
+    }
 }
 
 /* -------------------  LARGE SCREENS  -------------- */
 
 @media (min-width: 1824px) {
-    /* use mobile */
+    .rover-img-wrapper {
+        max-width: 1000px;
+    }
 }

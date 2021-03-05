@@ -41,6 +41,7 @@ app.get('/rovers/:rover_name', async (req, res) => {
         console.log('error: ', err);
     }
 });
+
 app.get('/rover_photo/:rover_name', async (req, res) => {
     try {
         // const earth_date = req.query.max_date;

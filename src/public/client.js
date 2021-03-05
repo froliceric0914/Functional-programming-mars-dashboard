@@ -9,8 +9,6 @@ todo:
 */
 
 let store = {
-    user: { name: 'Student' },
-    apod: '',
     roverNames: ['Curiosity', 'Opportunity', 'Spirit'],
     selectedRover: 'Curiosity',
     rovers: {},
@@ -72,14 +70,16 @@ const App = (state) => {
 
     return `
         <header>${NavBar(roverNames, selectedRover)}</header>
-        <main>
-            ${Greeting(store.user.name)}
+            <main>
+            ${Greeting()}
             <section>
                 ${RoverData(rovers, selectedRover, photos)}
-                </section>
+            </section>
                 </main>
-                <footer></footer>
-                `;
+        <footer>
+        <p>This website is made by <span id="heart">&#9829;</span> and based on NASA open API service (<a href="https://api.nasa.gov/" target="_blank">https://api.nasa.gov/)</a></p> 
+        <p>Developed and maintainedby Eric Zhao(github id: <a href="https://github.com/froliceric0914" target="_blank">froliceric0914</a>)</p>
+        </footer>`;
     // ${ImageOfTheDay(apod)}
 
     /* <div>${LatestRoverPhotos(rovers, photos)}</div> */
@@ -118,11 +118,15 @@ const RoverData = (rovers, selectedRover, photos) => {
     if (roverToRender) {
         return `<section>
         <div class="dashboard"> 
-            <div>${LatestRoverPhoto(roverToRender.name, photos)}</div>
+            <div class="rover-info">${LatestRoverPhoto(
+                roverToRender.name,
+                photos
+            )}
         
-            <p>Rover Name: ${rover}</p>
-            <p>Launch date: ${roverToRender.launch_date}</p>
-            <p>Landing date: ${roverToRender.landing_date}</p>
+                <p>Rover Name: ${rover}</p>
+                <p>Launch date: ${roverToRender.launch_date}</p>
+                <p>Landing date: ${roverToRender.landing_date}</p>
+            </div>
         </div>
     </section>`;
     }
@@ -143,16 +147,18 @@ const LatestRoverPhoto = (rover_name, photos) => {
 
     if (selectedRoverPhotos) {
         return `
-            <section>
-                <p>Check out some of ${rover_name}'s most recent photo:</p>
-                <div class="photos">
+            <section class="photos">
+                <p>Check the latest photo taken by ${rover_name}:</p>
+                <div>
                     ${selectedRoverPhotos
                         .map(
                             (photo) =>
                                 `
                                 <div>
-                                    <img class="rover-img" src=${photo.img_src} width="300px" />
-                                    <div>This photo was taken on earth day of ${photo.earth_date}</div>
+                                    <div class="rover-img-wrapper">
+                                        <img class="rover-img" src=${photo.img_src} />
+                                        <div>This photo was taken on earth day of ${photo.earth_date}</div>
+                                    </div>
                                 </div>`
                         )
                         .join('')}
