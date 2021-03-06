@@ -82,7 +82,7 @@ const App = (state) => {
     return `
         <header>${NavBar(roverNames, selectedRover)}</header>
             <main>
-            ${Greeting()}
+            <h1 class="greeting">Welcome to check the general infomation of Mars rovers</h1>
             <section>
                 ${RoverData(rovers, selectedRover)}
             </section>
@@ -100,48 +100,6 @@ window.addEventListener('load', () => {
 
 // ------------------------------------------------------  COMPONENTS
 
-// Pure function that renders conditional information -- THIS IS JUST AN EXAMPLE, you can delete it.
-const Greeting = (name) => {
-    if (name) {
-        return `
-            <h1>Welcome!</h1>
-        `;
-    }
-
-    return `
-        <h1>Hello!</h1>
-    `;
-};
-
-//call the photo API
-const RoverData = (rovers, selectedRover) => {
-    const rover = Object.keys(rovers).find((rover) => rover === selectedRover);
-
-    if (!rover) {
-        //call get rover data api
-        getRoverData(selectedRover);
-    }
-
-    let roverToRender = rovers[rover];
-
-    if (roverToRender) {
-        return `<section>
-        <div class="dashboard"> 
-            <div class="rover-info">
-                ${LatestRoverPhoto(selectedRover, rovers)}
-                <p>Rover Name: ${rover}</p>
-                <p>Launch date: ${roverToRender.launch_date}</p>
-                <p>Landing date: ${roverToRender.landing_date}</p>
-            </div>
-        </div>
-    </section>`;
-    }
-    return `
-        <section>
-            <div> Loading infomation of rover ${selectedRover}... </div>
-        </section>`;
-};
-
 const LatestRoverPhoto = (rover_name, rovers) => {
     const selectedRoverPhotos = rovers[rover_name].photo;
 
@@ -156,22 +114,46 @@ const LatestRoverPhoto = (rover_name, rovers) => {
     }
 
     return `
-            <section class="photos">
-                <p>Check the latest photo taken by ${rover_name}:</p>
+            <section class="photos-container">
+                <p>Check the latest photo taken by the rover ${rover_name}:</p>
                 <div>
                     ${selectedRoverPhotos
                         .map(
                             (photo) =>
                                 `
-                                <div>
-                                    <div class="rover-img-wrapper">
-                                        <img class="rover-img" src=${photo.img_src} />
-                                        <div>This photo was taken on earth day of ${photo.earth_date}</div>
-                                    </div>
-                                </div>`
+                                <div class="rover-img-wrapper">
+                                    <img class="rover-img" src=${photo.img_src} />
+                                    <div>This photo was taken on earth day of ${photo.earth_date}</div>
+                                </div>
+                               `
                         )
                         .join('')}
                 </div>
             </section>
         `;
+};
+
+const RoverData = (rovers, selectedRover) => {
+    const rover = Object.keys(rovers).find((rover) => rover === selectedRover);
+    const roverToRender = rovers[rover];
+
+    if (!rover) {
+        //call get rover data api
+        getRoverData(selectedRover);
+        return `
+        <section>
+            <div> Loading infomation of rover ${selectedRover}... </div>
+        </section>`;
+    }
+
+    return `<section>
+        <div class="dashboard"> 
+            <div class="rover-info">
+                ${LatestRoverPhoto(selectedRover, rovers)}
+                <p>Rover Name: ${rover}</p>
+                <p>Launch date: ${roverToRender.launch_date}</p>
+                <p>Landing date: ${roverToRender.landing_date}</p>
+            </div>
+        </div>
+    </section>`;
 };
