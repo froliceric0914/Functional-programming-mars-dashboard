@@ -5866,21 +5866,7 @@
 
 },{}],2:[function(require,module,exports){
 // const { update } = require('immutable');
-const { Map, List, set, merge } = require('immutable');
-
-/*
-todo:
-1. display 3 photo for each rover;
-2. add content to the bodt;
-3. update the store to immutabl way
-*/
-
-// let store = {
-//     roverNames: ['Curiosity', 'Opportunity', 'Spirit'],
-//     selectedRover: 'Curiosity',
-//     rovers: {},
-//     photos: {},
-// };
+const { Map, List, set } = require('immutable');
 
 let store = Map({
     roverNames: List(['Curiosity', 'Opportunity', 'Spirit']),
@@ -5894,14 +5880,7 @@ const updateStore = function (state, newState) {
 };
 
 // add our markup to the page
-
 const root = document.getElementById('root');
-
-//could be updated to immutable way
-// const updateStore = (store, newState) => {
-//     store = Object.assign(store, newState);
-//     render(root, store);
-// };
 
 const render = async (root, state) => {
     root.innerHTML = App(state);
@@ -5928,10 +5907,8 @@ const NavBar = (roverNames, selectedRover) => {
     `;
 };
 
-/* main part to be updated*/
 const App = (state) => {
     let { roverNames, rovers, selectedRover } = state.toJS();
-    console.log('state', state.toJS());
 
     return `
         <header>${NavBar(roverNames, selectedRover)}</header>
@@ -5945,9 +5922,6 @@ const App = (state) => {
         <p>This website is made by <span id="heart">&#9829;</span> and based on NASA open API service (<a href="https://api.nasa.gov/" target="_blank">https://api.nasa.gov/)</a></p> 
         <p>Developed and maintainedby Eric Zhao(github id: <a href="https://github.com/froliceric0914" target="_blank">froliceric0914</a>)</p>
         </footer>`;
-    // ${ImageOfTheDay(apod)}
-
-    /* <div>${LatestRoverPhotos(rovers, photos)}</div> */
 };
 
 // listening for load event because page should load before any JS is called
@@ -5970,8 +5944,6 @@ const Greeting = (name) => {
     `;
 };
 
-//could add selectRover into the params
-//get he launch date, landing date, name and status along with any other information about the rover.
 //call the photo API
 const RoverData = (rovers, selectedRover) => {
     const rover = Object.keys(rovers).find((rover) => rover === selectedRover);
@@ -6001,16 +5973,15 @@ const RoverData = (rovers, selectedRover) => {
 };
 
 const LatestRoverPhoto = (rover_name, rovers) => {
-    console.log('rover_name 144', rover_name);
-    console.log('rovers 145', rovers);
-
     const selectedRoverPhotos = rovers[rover_name].photo;
     if (!selectedRoverPhotos) {
         getLatestRoverPhotos(rover_name);
-    }
-
-    if (selectedRoverPhotos) {
         return `
+        <section>
+            <div> Loading Photos... </div>
+        </section>`;
+    }
+    return `
             <section class="photos">
                 <p>Check the latest photo taken by ${rover_name}:</p>
                 <div>
@@ -6029,12 +6000,6 @@ const LatestRoverPhoto = (rover_name, rovers) => {
                 </div>
             </section>
         `;
-    }
-
-    return `
-        <section>
-            <div> Loading Photos... </div>
-        </section>`;
 };
 
 // ------------------------------------------------------  API CALLS
