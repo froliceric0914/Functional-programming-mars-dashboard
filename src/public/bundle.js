@@ -6065,11 +6065,11 @@ const getRoverData = (rover_name) => {
             //now everything are stored in store.rovers, but the values could be store in store[keys]
             updateStore(store, {
                 rovers: set(store.toJS().rovers, rover_name, {
-                    [rover_name]: {
-                        launch_date: photo_manifest.launch_date,
-                        landing_date: photo_manifest.landing_date,
-                        name: photo_manifest.name,
-                    },
+                    //need to update the structure here
+
+                    launch_date: photo_manifest.launch_date,
+                    landing_date: photo_manifest.landing_date,
+                    name: photo_manifest.name,
                 }),
             });
         });

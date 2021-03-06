@@ -199,11 +199,10 @@ const getRoverData = (rover_name) => {
             updateStore(store, {
                 rovers: set(store.toJS().rovers, rover_name, {
                     //need to update the structure here
-                    [rover_name]: {
-                        launch_date: photo_manifest.launch_date,
-                        landing_date: photo_manifest.landing_date,
-                        name: photo_manifest.name,
-                    },
+
+                    launch_date: photo_manifest.launch_date,
+                    landing_date: photo_manifest.landing_date,
+                    name: photo_manifest.name,
                 }),
             });
         });
