@@ -66,10 +66,6 @@ const NavBar = (roverNames, selectedRover) => {
 const App = (state) => {
     let { roverNames, rovers, selectedRover, photos } = state.toJS();
     console.log('state', state.toJS());
-    console.log('roverNames', roverNames);
-    console.log('rovers', rovers);
-    console.log('selectedRover', selectedRover);
-    console.log('photos', photos);
 
     return `
         <header>${NavBar(roverNames, selectedRover)}</header>
@@ -113,15 +109,16 @@ const Greeting = (name) => {
 //call the photo API
 const RoverData = (rovers, selectedRover, photos) => {
     //need a proper way to seach through immutable data
-    console.log('rovers 116:', rovers);
-    console.log('selectedRover 117:', selectedRover);
+    console.log('rovers 112:', rovers);
+    console.log('selectedRover 113:', selectedRover);
+    console.log('photos 114:', photos);
     const rover = Object.keys(rovers).find((rover) => rover === selectedRover);
     let roverToRender = store.toJS().rovers[rover];
 
     if (!rover) {
         getRoverData(selectedRover);
     }
-    console.log('roverToRender 124', roverToRender);
+
     if (roverToRender) {
         return `<section>
         <div class="dashboard"> 
@@ -148,9 +145,10 @@ const LatestRoverPhoto = (rover_name, photos) => {
     if (!roverPhoto) {
         getLatestRoverPhotos(rover_name);
     }
-    console.log('roverPhoto 150', roverPhoto);
+    console.log('roverPhoto 147', roverPhoto);
 
     const selectedRoverPhotos = store.toJS().photos[rover_name];
+    console.log('selectedRoverPhotos 150', selectedRoverPhotos);
 
     if (selectedRoverPhotos) {
         return `
@@ -215,9 +213,7 @@ const getLatestRoverPhotos = async (rover_name) => {
             .then((data) => {
                 const trimPhoto = data.latest_photos.slice(0, 1);
                 updateStore(store, {
-                    photos: set(store.toJS(), rover_name, {
-                        [rover_name]: trimPhoto,
-                    }),
+                    photos: set(store.toJS().photos, rover_name, trimPhoto),
                 });
             });
     } catch (errr) {
