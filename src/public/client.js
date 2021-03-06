@@ -19,7 +19,6 @@ let store = Map({
     roverNames: List(['Curiosity', 'Opportunity', 'Spirit']),
     selectedRover: 'Curiosity',
     rovers: Map({}),
-    photos: Map({}),
 });
 
 const updateStore = function (state, newState) {
@@ -64,7 +63,7 @@ const NavBar = (roverNames, selectedRover) => {
 
 /* main part to be updated*/
 const App = (state) => {
-    let { roverNames, rovers, selectedRover, photos } = state.toJS();
+    let { roverNames, rovers, selectedRover } = state.toJS();
     console.log('state', state.toJS());
 
     return `
@@ -72,7 +71,7 @@ const App = (state) => {
             <main>
             ${Greeting()}
             <section>
-                ${RoverData(rovers, selectedRover, photos)}
+                ${RoverData(rovers, selectedRover)}
             </section>
                 </main>
         <footer>
@@ -107,23 +106,20 @@ const Greeting = (name) => {
 //could add selectRover into the params
 //get he launch date, landing date, name and status along with any other information about the rover.
 //call the photo API
-const RoverData = (rovers, selectedRover, photos) => {
-    //need a proper way to seach through immutable data
-    console.log('rovers 112:', rovers);
-    console.log('selectedRover 113:', selectedRover);
-    console.log('photos 114:', photos);
+const RoverData = (rovers, selectedRover) => {
     const rover = Object.keys(rovers).find((rover) => rover === selectedRover);
-    let roverToRender = store.toJS().rovers[rover];
 
     if (!rover) {
         getRoverData(selectedRover);
     }
 
+    let roverToRender = rovers[rover];
+
     if (roverToRender) {
         return `<section>
         <div class="dashboard"> 
             <div class="rover-info">
-                ${LatestRoverPhoto(selectedRover, photos)}
+                ${LatestRoverPhoto(selectedRover, rovers)}
                 <p>Rover Name: ${rover}</p>
                 <p>Launch date: ${roverToRender.launch_date}</p>
                 <p>Landing date: ${roverToRender.landing_date}</p>
@@ -137,18 +133,14 @@ const RoverData = (rovers, selectedRover, photos) => {
         </section>`;
 };
 
-const LatestRoverPhoto = (rover_name, photos) => {
+const LatestRoverPhoto = (rover_name, rovers) => {
     console.log('rover_name 144', rover_name);
-    console.log('photos 145', photos);
-    const roverPhoto = Object.keys(photos).find((key) => key === rover_name);
+    console.log('rovers 145', rovers);
 
-    if (!roverPhoto) {
+    const selectedRoverPhotos = rovers[rover_name].photo;
+    if (!selectedRoverPhotos) {
         getLatestRoverPhotos(rover_name);
     }
-    console.log('roverPhoto 147', roverPhoto);
-
-    const selectedRoverPhotos = store.toJS().photos[rover_name];
-    console.log('selectedRoverPhotos 150', selectedRoverPhotos);
 
     if (selectedRoverPhotos) {
         return `
@@ -179,25 +171,12 @@ const LatestRoverPhoto = (rover_name, photos) => {
 };
 
 // ------------------------------------------------------  API CALLS
-
-//add rover photo API call method
-/*
-1. get rover data
-2. get latest rover photo
-...
-could be removed into helper function
-need to be put on the 
-*/
-
 const getRoverData = (rover_name) => {
     fetch(`http://localhost:3000/rovers/${rover_name}`)
         .then((res) => res.json())
         .then(({ photo_manifest }) => {
-            //now everything are stored in store.rovers, but the values could be store in store[keys]
             updateStore(store, {
                 rovers: set(store.toJS().rovers, rover_name, {
-                    //need to update the structure here
-
                     launch_date: photo_manifest.launch_date,
                     landing_date: photo_manifest.landing_date,
                     name: photo_manifest.name,
@@ -213,7 +192,13 @@ const getLatestRoverPhotos = async (rover_name) => {
             .then((data) => {
                 const trimPhoto = data.latest_photos.slice(0, 1);
                 updateStore(store, {
-                    photos: set(store.toJS().photos, rover_name, trimPhoto),
+                    rovers: {
+                        [rover_name]: set(
+                            store.toJS().rovers[rover_name],
+                            'photo',
+                            trimPhoto
+                        ),
+                    },
                 });
             });
     } catch (errr) {
