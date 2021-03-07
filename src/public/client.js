@@ -1,8 +1,3 @@
-//Build custom pure functions to do logic. No logic should happen outside of these functions.
-/*
-Add the Mars weather embed code.
-Add a wind graph at the location of the rover.
-*/
 const { Map, List, set } = require('immutable');
 
 let store = Map({
@@ -145,14 +140,14 @@ const App = (state) => {
     return `
         <header>${NavBar(roverNames, selectedRover)}</header>
             <main>
-            <h1 class="greeting">Welcome to check the general infomation of Mars rovers</h1>
+            <h1 class="greeting">Welcome to Mars Rovers' Dashboard</h1>
             <section>
                 ${RoverData(rovers, selectedRover)}
             </section>
                 </main>
         <footer>
         <p>This website is made by <span id="heart">&#9829;</span> and based on NASA open API service (<a href="https://api.nasa.gov/" target="_blank">https://api.nasa.gov/)</a></p> 
-        <p>Developed and maintainedby Eric Zhao(github id: <a href="https://github.com/froliceric0914" target="_blank">froliceric0914</a>)</p>
+        <p>Developed and maintained by Eric Zhao(github id: <a href="https://github.com/froliceric0914" target="_blank">froliceric0914</a>)</p>
         </footer>`;
 };
 
