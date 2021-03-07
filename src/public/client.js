@@ -1,8 +1,9 @@
 const { Map, List, set } = require('immutable');
 
 let store = Map({
+    apod: '',
     roverNames: List(['Curiosity', 'Opportunity', 'Spirit']),
-    selectedRover: 'Curiosity',
+    selectedRover: '',
     rovers: Map({}),
 });
 
@@ -12,11 +13,20 @@ const updateStore = function (state, newState) {
 };
 
 // ------------------------------------------------------  API CALLS
+
+// Example API call
+const getImageOfTheDay = (state) => {
+    let { apod } = state;
+
+    fetch(`http://localhost:3000/apod`)
+        .then((res) => res.json())
+        .then((apod) => updateStore(store, { apod }));
+};
+
 const getRoverData = (rover_name) => {
     fetch(`http://localhost:3000/rovers/${rover_name}`)
         .then((res) => res.json())
         .then(({ photo_manifest }) => {
-            console.log('photo_manifest', photo_manifest);
             updateStore(store, {
                 rovers: set(store.toJS().rovers, rover_name, {
                     launch_date: photo_manifest.launch_date,
@@ -75,6 +85,33 @@ const NavBar = (roverNames, selectedRover) => {
     `;
 };
 
+const ImageOfTheDay = (apod) => {
+    const today = new Date();
+
+    // If image does not already exist, or it is not from today -- request it again
+    if (!apod || apod.date === today.getDate()) {
+        getImageOfTheDay(store);
+        return `<div> Loading image of today... </div>`;
+    }
+
+    // check if the photo of the day is actually type video
+    if (apod.media_type === 'video') {
+        return `
+            <p>See today's featured video <a href="${apod.url}">here</a></p>
+            <p>${apod.title}</p>
+            <p>${apod.explanation}</p>
+        `;
+    } else {
+        return `
+        <div class="rover-img-wrapper">
+            <img class="rover-img" src="${apod.image.url}" />
+        </div>
+        <p>${apod.image.explanation}</p>
+        
+        `;
+    }
+};
+
 const LatestRoverPhoto = (rover_name, rovers) => {
     const selectedRoverPhotos = rovers[rover_name].photo;
 
@@ -98,7 +135,7 @@ const LatestRoverPhoto = (rover_name, rovers) => {
                                 `
                                 <div class="rover-img-wrapper">
                                     <img class="rover-img" src=${photo.img_src} />
-                                    <div>This photo was taken on earth day of ${photo.earth_date}</div>
+                                    <p>This photo was taken on earth day of ${photo.earth_date}</p>
                                 </div>
                                `
                         )
@@ -135,14 +172,16 @@ const RoverData = (rovers, selectedRover) => {
 };
 
 const App = (state) => {
-    let { roverNames, rovers, selectedRover } = state.toJS();
-
+    let { apod, roverNames, rovers, selectedRover } = state.toJS();
+    const infoToRender = selectedRover
+        ? RoverData(rovers, selectedRover)
+        : ImageOfTheDay(apod);
     return `
         <header>${NavBar(roverNames, selectedRover)}</header>
             <main>
             <h1 class="greeting">Welcome to Mars Rovers' Dashboard</h1>
             <section>
-                ${RoverData(rovers, selectedRover)}
+                ${infoToRender}
             </section>
                 </main>
         <footer>
