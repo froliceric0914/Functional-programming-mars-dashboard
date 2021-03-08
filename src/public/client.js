@@ -32,7 +32,7 @@ const getRoverData = (rover_name) => {
                     launch_date: photo_manifest.launch_date,
                     landing_date: photo_manifest.landing_date,
                     name: photo_manifest.name,
-                    status: photo_manifest.status, //need to add
+                    status: photo_manifest.status,
                 }),
             });
         });
@@ -46,7 +46,7 @@ const getLatestRoverPhotos = (rover_name) => {
             updateStore(store, {
                 rovers: {
                     [rover_name]: set(
-                        store.toJS().rovers[rover_name],
+                        store.get('rovers')[rover_name],
                         'photo',
                         trimPhoto
                     ),
